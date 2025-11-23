@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RESET HENESYS - Respawn Timer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        maple: {
+                            orange: '#FF9E40',
+                            green: '#8BC34A',
+                            blue: '#4FC3F7',
+                            dark: '#374151',
+                            bg: '#E0F7FA',
+                            card: '#FFFFFF',
+                            darkBg: '#1a202c',
+                            darkCard: '#2d3748',
+                            darkText: '#e2e8f0'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Varela+Round&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=4">
+    <script src="main.js?v=4" defer></script>
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300">
+
+    <!-- Top Controls -->
+    <div class="absolute top-4 right-4 flex gap-2">
+        <!-- Language Switcher -->
+        <select id="lang-select"
+            class="bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1 text-xs font-bold focus:outline-none focus:border-orange-400 transition-colors text-gray-700 dark:text-gray-200">
+            <option value="es">🇪🇸 ES</option>
+            <option value="en">🇺🇸 EN</option>
+            <option value="kr">🇰🇷 KR</option>
+        </select>
+
+        <!-- Theme Toggle -->
+        <button id="theme-toggle"
+            class="bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg p-1.5 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+            <!-- Sun Icon -->
+            <svg id="icon-sun" class="w-4 h-4 text-orange-400 hidden dark:block" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                </path>
+            </svg>
+            <!-- Moon Icon -->
+            <svg id="icon-moon" class="w-4 h-4 text-gray-400 block dark:hidden" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-2xl space-y-8">
+
+        <!-- Header / Logo Area -->
+        <div class="text-center space-y-3">
+            <div class="inline-block animate-bounce-slow mb-2">
+                <img src="assets/logo.png" alt="Reset Henesys Logo" class="h-32 w-auto mx-auto drop-shadow-md"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="font-pixel text-4xl text-orange-500" style="display:none;">RH</div>
+            </div>
+            <p data-i18n="subtitle" class="text-sm text-gray-500 dark:text-gray-400 font-bold tracking-wide uppercase">
+                NFT Map Respawn Timer</p>
+        </div>
+
+        <!-- Timezone Selector (Custom Dropdown) -->
+        <div class="maple-card p-4 relative z-50">
+            <div class="custom-select" id="custom-timezone-select">
+                <div class="select-trigger" id="select-trigger">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3" id="selected-flag">🌍</span>
+                        <span class="select-value" id="selected-timezone">Seleccionar Zona Horaria</span>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="select-dropdown" id="select-dropdown">
+                    <div class="select-search">
+                        <input type="text" id="timezone-search" placeholder="Buscar país o ciudad..."
+                            autocomplete="off">
+                    </div>
+                    <div class="select-options" id="timezone-options">
+                        <!-- Options populated by JS -->
+                    </div>
+                </div>
+            </div>
+            <!-- Hidden native select for fallback/state -->
+            <select id="timezone-select" class="hidden"></select>
+        </div>
+
+        <!-- Timer Card -->
+        <div id="main-card" class="maple-card p-6 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-300 via-yellow-300 to-green-300">
+            </div>
+
+            <h2 data-i18n="nextEventLabel"
+                class="text-gray-400 dark:text-gray-500 text-xs font-bold uppercase mb-4 tracking-widest">Próximo Spawn
+                En</h2>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar">
+                    <div id="progress-sprite" class="progress-sprite">🍄</div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center gap-2 mb-6">
+                <div id="countdown"
+                    class="font-pixel text-3xl md:text-4xl text-gray-800 dark:text-white tracking-tighter">
+                    --:--:--
+                </div>
+                <button id="discord-btn" class="discord-btn" title="Copy Discord Timestamp">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                    </svg>
+                    <span id="discord-text" data-i18n="copyDiscord">Copiar Discord</span>
+                </button>
+            </div>
+
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-100 dark:border-blue-800/50">
+                <p data-i18n="localTimeLabel" class="text-xs text-blue-400 font-bold uppercase mb-1">Hora del Spawn</p>
+                <p id="next-event-local" class="text-lg font-bold text-blue-600 dark:text-blue-400">Calculando...</p>
+            </div>
+        </div>
+
+        <!-- Next Schedules (WAVE Grid) -->
+        <div class="space-y-4">
+            <h3 data-i18n="nextSchedulesTitle"
+                class="font-pixel text-xs text-center text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                Próximos Spawns</h3>
+            <div id="future-schedules" class="wave-grid">
+                <!-- WAVE Cards injected here -->
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-8 text-center text-xs text-gray-400 pb-4">
+        <p data-i18n="footer">Hecho con ❤️ para Maplers</p>
+    </footer>
+
+</body>
+
+</html>
